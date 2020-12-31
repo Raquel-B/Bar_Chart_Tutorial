@@ -1,8 +1,20 @@
 ---
 title: "Bar_Chart_Tutorial_ggplot2"
 author: "Raquel Baltazar"
-date: "12/31/2020"
-output: html_document
+date: "`r format(Sys.time(), '%a %d %b %Y (%H:%M:%S)')`"
+output:
+  html_document:
+    theme: united
+    highlight: tango
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+  word_document:
+    toc: yes
+    toc_depth: '3'
 ---
 
 ```{r setup, include=FALSE}
@@ -10,3 +22,182 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # How to Make Stunning Bar Charts in R: A Complete Guide with ggplot2
+
+The language of data visualization is universal. Not everyone will recognize a great visualization, but everyone will remember a terrible one. If you use tools and techniques discussed in this article, the chances for your visualization to be classified as “terrible” will be close to zero.
+
+This article shows you how to make all sorts of bar charts with R and `ggplot2`. You’ll also learn how to make them aesthetically-pleasing with colors, themes, titles, and labels. 
+
+# Table of Contents:
+
+**Today you’ll learn how to:**
+
++ Make your first bar chart
++ Change colors and themes
++ Add titles, subtitles, and captions
++ Edit axis labels
++ Make stacked, grouped, and horizontal bar charts
++ Add labels
+
+# Make Your First Bar Chart
+
+There are plenty of datasets built into R and thousands of others available online. Still, you’ll declare your own. The reasoning is simple – you’re here to learn how to make bar charts, not how to aggregate data.
+
+Here’s the dataset you’ll use today:
+
+
+```{r import_dataset}
+library(ggplot2)
+
+data <- data.frame(
+  quarter=c("Q1", "Q1", "Q2", "Q2", "Q3", "Q3", "Q4", "Q4"),
+  product=c("A", "B", "A", "B", "A", "B", "A", "B"),
+  profit=c(10, 14, 12, 11, 13, 15, 16, 18)
+)
+```
+
+R’s standard library for data visualization is `ggplot2`. It’s based on the layering principle. For example, you first declare a data layer and then a visualization layer. These two are mandatory for any visualization. You’ll see later how additional layers can make charts more informative and appealing.
+
+To start, you’ll make a bar chart that has the column `quarter` on the x-axis and `profit` on the y-axis. That’s declared in the first layer (data), and the second layer (visualization) specifies which type of visualization you want. The `geom_bar` and `geom_col` layers are used to create bar charts. With the first option, you need to specify s`tat = "identity"` for it to work, so the ladder is used throughout the article.
+
+You can create a simple bar chart with this code:
+
+```{r simple_bar_chart}
+ggplot(data, aes(x = quarter, y = profit)) + 
+  geom_col()
+```
+Image 1 – Simple bar chart
+
+
+This one gets the job done but doesn’t look like something you’d want to show to your boss. You’ll fix it in the following sections.
+
+# Colors and Themes
+
+Tweaking colors and themes is the simplest thing you can do to make visualization look better. The `geom_bar()` has two useful parameters:
+
+`color` – outline color of the bars
+`fill` – fill color of the bars
+
+Here’s how to use `fill` to make your chart Appsilon-approved:
+
+```{r using_fill_change_bar_color}
+ggplot(data, aes(x = quarter, y = profit)) + 
+  geom_col(fill = "#0099f9")
+```
+Image 2 – Using fill to change the bar color
+
+The `color` parameter changes only the outline. The dataset you’re using has two distinct products. R draws a fill line between products’ values, as stacked bar charts are used by default. You’ll learn more about the stacked charts later.
+
+Here’s what this means in practice. The code snippet below sets the fill color to white and outline color to blue:
+
+```{r _changing_outline_color}
+ggplot(data, aes(x = quarter, y = profit)) +
+  geom_col(color = "#0099f9", fill = "#ffffff")
+```
+Image 3 – Changing the outline color
+
+In case coloring doesn’t do the trick, you can completely change the theme. That’s yet another layer to add after the initial visualization layer. Here’s how to do it:
+
+```{r changing_theme}
+ggplot(data, aes(x = quarter, y = profit)) +
+  geom_col(fill = "#0099f9") +
+  theme_classic()
+```
+Image 4 – Changing the visualization theme
+
+If this theme isn’t your thing, there’s plenty more to pick from. You can find the entire list here.
+
+# Titles, Subtitles, and Captions
+A visualization without a title is useless. There’s no way to know if you’re looking at Election votes or 2020 USA election votes in California. You can use subtitles to put additional information, but it’s not mandatory. Captions are useful for placing visualization credits and sources.
+
+The most convenient way to add these is through a `labs()` layer. It takes in values for `title`, `subtitle`, and `caption.` 
+Let’s see how to add all three:
+
+```{r title_subtitle_caption_with_default_styles}
+ggplot(data, aes(x = quarter, y = profit)) +
+  geom_col(fill = "#0099f9") +
+  labs(
+    title = "Quarterly Profit (in million U.S. dollars)",
+    subtitle = "A simple bar chart",
+    caption = "Source: ImaginaryCo"
+  )
+```
+Image 5 – Title, subtitle, and caption with default styles
+
+It’s a good start, but what if you want to add styles? Let’s see how to color the title, bold the subtitle, and italicize the caption:
+
+```{r styling_title_subtitle__caption}
+ggplot(data, aes(x = quarter, y = profit)) +
+  geom_col(fill = "#0099f9") +
+  labs(
+    title = "Quarterly Profit (in million U.S. dollars)",
+    subtitle = "A simple bar chart",
+    caption = "Source: ImaginaryCo"
+  ) +
+  theme(
+    plot.title = element_text(color = "#0099f9", size = 20),
+    plot.subtitle = element_text(face = "bold"),
+    plot.caption = element_text(face = "italic")
+  )
+```
+Image 6 – Styling title, subtitle, and caption
+
+Let’s take this a step further. Here’s how to align the title to the middle, subtitle to the right, and caption to the left:
+
+```{r aligning_title_subtitle_caption}
+ggplot(data, aes(x = quarter, y = profit)) +
+  geom_col(fill = "#0099f9") +
+  labs(
+    title = "Quarterly Profit (in million U.S. dollars)",
+    subtitle = "A simple bar chart",
+    caption = "Source: ImaginaryCo"
+  ) +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    plot.subtitle = element_text(hjust = 1),
+    plot.caption = element_text(hjust = 0)
+  )
+```
+Image 7 – Aligning title, subtitle, and caption
+
+
+You’ve learned how to add a nicely-formatted title, but the default axis labels still holds your visualization back. You’ll learn how to change them next.
+
+# Axis Labels
+Long story short – it works identically as with titles and subtitles. The `labs()` layer takes in values for both X and Y-axis labels.
+Here’s how to change the text:
+
+```{r changing_x_and_y_labels}
+ggplot(data, aes(x = quarter, y = profit)) +
+  geom_col(fill = "#0099f9") +
+  labs(
+    x = "Quarter of 2020",
+    y = "Profit in 2020"
+  )
+```
+Image 8 – Changing X and Y axis labels
+
+You can change the styles the same way you did with titles, subtitles, and captions. The following code snippet will make your x-axis label blue and bold, and y-axis label italic:
+
+```{r changing_x_and_y_styling}
+ggplot(data, aes(x = quarter, y = profit)) +
+  geom_col(fill = "#0099f9") +
+  labs(
+    x = "Quarter of 2020",
+    y = "Profit in 2020"
+  ) +
+  theme(
+    axis.title.x = element_text(color = "#0099f9", size = 15, face = "bold"),
+    axis.title.y = element_text(size = 15, face = "italic")
+  )
+```
+Image 9 – Changing stylings of X and Y axis labels
+
+And that does it for changing the basic visuals. You’ll learn how to work with different bar charts next – stacked, grouped, and horizontal.
+
+# Stacked, Grouped, and Horizontal Bar Charts
+The `ggplot2` package uses stacked bar charts by default. Stacked bar charts are best used when all portions are colored differently.
+
+
+
+
+
