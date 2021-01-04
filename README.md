@@ -1,13 +1,9 @@
 ---
 title: "README"
 author: "Raquel Baltazar"
-date: "12/31/2020"
+date: "`r format(Sys.time(), '%a %d %b %Y (%H:%M:%S)')`"
 output: html_document
 ---
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 
 # How to Make Stunning Bar Charts in R: A Complete Guide with ggplot2
 
