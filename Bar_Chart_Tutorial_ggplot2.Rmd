@@ -195,9 +195,140 @@ Image 9 – Changing stylings of X and Y axis labels
 And that does it for changing the basic visuals. You’ll learn how to work with different bar charts next – stacked, grouped, and horizontal.
 
 # Stacked, Grouped, and Horizontal Bar Charts
+
 The `ggplot2` package uses stacked bar charts by default. Stacked bar charts are best used when all portions are colored differently.
 
+To change the coloring, you only need to change the `fill` value in the data layer. Here’s an example:
+
+```{r change_fill_in_data_layer}
+ggplot(data, aes(x = quarter, y = profit, fill = product)) + geom_col()
+```
+Image 10 – Default stacked bar chart
+
+There’s a visible distinction between products, and you can now see how much profit each product made quarterly. 
+
+There are two ways to change each portion’s color:
+
++ **Manually** – by specifying a vector of color names or color hex codes
++ **With palettes** – by using built-in color palettes
+
+**Manually:**
+Let’s cover the manual approach first. You have to add a layer with `scale_fill_manual`:
+
+```{r manually_change_portion_color}
+ggplot(data, aes(x = quarter, y = profit, fill = product)) + 
+  geom_col() + 
+  scale_fill_manual(values = c("#69c6ff", "#0099f9"))
+```
+Image 11 – Stacked bar chart with custom colors
+
+Palettes are a bit easier because you don’t need to know exact color values. For the same reason, it can also be considered as a limitation. (Here’s a list of built-in palettes: http://www.sthda.com/english/wiki/ggplot2-colors-how-to-change-colors-automatically-and-manually#use-rcolorbrewer-palettes). 
+The `scale_fill_brewer` layer is used to work with palettes:
+
+```{r using_scale_fill_brewer_to_work_with_pallets}
+ggplot(data, aes(x = quarter, y = profit, fill = product)) +
+  geom_col() +
+  scale_fill_brewer(palette = "Set1")
+```
+Image 12 – Stacked bar chart colored with a built-in palette
+
+Onto the **grouped bar charts** now. They display bars corresponding to a group next to each other instead of on top of each other. 
+To use grouped bar charts, you need to put `position = position_dodge()` into a `geom_bar` layer:
+
+```{r goup_bar_charts_next_to_each_other}
+ggplot(data, aes( x = quarter, y = profit, fill = product)) + 
+  geom_col(position = position_dodge())
+```
+Image 13 – Grouped bar chart (default)
+
+You can change the coloring the same way you did with stacked bar charts – through the `scale_fill_manual` or `scale_fill_brewer` layers. Here’s an example:
+
+```{r change_coloring_through_scale_fill_manual}
+ggplot(data, aes(x = quarter, y = profit, fill = product)) +
+  geom_col(position = position_dodge()) +
+  scale_fill_manual(values = c("#3db5ff", "#0099f9"))
+```
+Image 14 – Grouped bar chart with custom colors
 
 
+Finally, let’s cover **horizontal bar charts**. They are useful when there are many categories on the x-axis or when their names are long. The `coord_flip()` is used to turn any vertical bar chart into a horizontal one:
 
 
+```{r turn_barchart_horizontally_with_coor_flip}
+ggplot(data, aes(x = quarter, y = profit)) +
+  geom_col(fill = "#0099f9") +
+  coord_flip()
+```
+Image 15 – Horizontal bar chart (default)
+
+You can use the `scale_fill_manual` or `scale_fill_brewer` layers to change the color. Here’s an example:
+
+```{r change_color_with_scale_fill_manual_and_scale_fill_brewer}
+ggplot(data, aes(x = quarter, y = profit, fill = product)) +
+  geom_col(position = position_dodge()) +
+  scale_fill_manual(values = c("#3db5ff", "#0099f9")) +
+  coord_flip()
+```
+Image 16 – Horizontal bar chart with custom colors
+
+
+Now you know how to make every type of bar chart – but there’s still one thing you can improve. Let’s see what that is in the next section.
+
+# Labels
+
+Bar charts can be hard to look at. Knowing the exact value is often a requirement. If the y-axis is on a scale of millions, reading values from a chart becomes an approximation (at best). That’s where labels come in.
+
+You can put text somewhere near the top of each bar to show the exact value. That solves the problem of reading values from the chart. It also makes it more user-friendly, as you don’t have to divert your view to the y-axis constantly.
+
+You’ll learn how to put labels on top of bars. For the first example, you’ll need to filter the dataset so only product A is shown. The reason is simple – `ggplot2` uses stacked bar charts by default, and there are two products in the stack for each quarter. You’ll learn how to add labels for multiple stacks later, but let’s start with the basics.
+
+```{r code_for_labels_on_top}
+library(dplyr)
+
+data_a <- data %>%
+  filter(product == "A")
+
+ggplot(data_a, aes(x = quarter, y = profit)) +
+  geom_col(fill = "#0099f9") +
+  geom_text(aes(label = profit), vjust = -0.5, size = 5)
+```
+Image 17 – Labels on top of bars
+
+
+But what if you want to put the labels inside? Just play with `vjust` a bit. Setting it to 2 does the trick:
+
+```{r labels_inside}
+ggplot(data_a, aes(x = quarter, y = profit)) +
+  geom_col(fill = "#0099f9") +
+  geom_text(aes(label = profit), vjust = 2, size = 5, color = "#ffffff")
+```
+Image 18 – Labels inside the bars
+
+Things get a bit trickier if you need labels for multiple stacks. You have to specify `position = position_stack()` inside the `geom_text` layer. Setting the `vjust` to 0.5 makes them centered:
+
+```{r labels_for_multiple_stacks}
+ggplot(data, aes(x = quarter, y = profit, fill = product, label = profit)) +
+  geom_col() +
+  scale_fill_manual(values = c("#3db5ff", "#0099f9")) +
+  geom_text(position = position_stack(vjust = 0.5), size = 4, color = "#ffffff")
+
+```
+Image 19 – Labels inside the stacked bar chart
+
+
+There’s an alternative for a grouped bar chart. You’ll have to specify `position = position_dodge()` for it to work. This code centers the labels inside every group:
+
+```{r labels_inside_each_group_bar_chart}
+ggplot(data, aes(x = quarter, y = profit, fill = product)) +
+  geom_col(position = position_dodge()) +
+  scale_fill_manual(values = c("#3db5ff", "#0099f9")) +
+  geom_text(aes(label = profit), position = position_dodge(0.9), vjust = 2, size = 4, color = "#ffffff")
+```
+Image 20 – Labels centered inside the grouped bar chart
+
+And that’s all there is about labels and bar charts. Let’s wrap things up next.
+
+# Conclusion
+Today you’ve learned how to make every type of bar chart in R and how to customize it with colors, titles, subtitles, and labels. You’re now able to use bar charts for basic visualizations, reports, and dashboards. 
+
+You can expect more basic R tutorials weekly (probably Sunday) and more advanced tutorials throughout the week. Fill out the subscribe form below so you never miss an update.
